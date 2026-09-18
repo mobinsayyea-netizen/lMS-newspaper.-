@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>सुनो न्यूज़ | Suno News</title>
+<style>
+  :root{
+    --base:#14151a;
+    --surface:#1e2029;
+    --surface-raised:#262936;
+    --line:#33374a;
+    --text:#eceef2;
+    --text-dim:#9a9db0;
+    --signal:#e8a33d;
+    --signal-dim:#7a5a29;
+    --tuned:#4fb6a8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--base);
+    color:var(--text);
+    font-family:'Noto Sans','Noto Sans Devanagari','Noto Nastaliq Urdu',system-ui,-apple-system,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+    padding-bottom:48px;
+  }
+  header.app-head{
+    padding:22px 18px 16px;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+    background:var(--base);
+    z-index:5;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin:0 0 4px;
+  }
+  .brand-dial{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--signal);
+    flex-shrink:0;
+    box-shadow:0 0 0 3px var(--signal-dim);
+  }
+  h1{
+    font-size:1.35rem;
+    font-weight:700;
+    margin:0;
+    letter-spacing:0.01em;
+  }
+  .tagline{
+    color:var(--text-dim);
+    font-size:0.85rem;
+    margin:0 0 18px;
+  }
+
+  fieldset{
+    border:none;
+    padding:0;
+    margin:0 0 14px;
+  }
+  legend{
+    font-size:0.78rem;
+    color:var(--text-dim);
+    padding:0 0 6px;
+  }
+  .band{
+    display:flex;
+    gap:0;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    width:100%;
+  }
+  .band button{
+    flex:1;
+    background:transparent;
+    color:var(--text-dim);
+    border:none;
+    border-right:1px solid var(--line);
+    padding:9px 4px;
+    font-size:0.88rem;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .band button:last-child{border-right:none;}
+  .band button[aria-pressed="true"]{
+    background:var(--tuned);
+    color:#0c1413;
+    font-weight:700;
+  }
+  .band button:focus-visible, .chip:focus-visible, .icon-btn:focus-visible{
+    outline:3px solid var(--signal);
+    outline-offset:2px;
+  }
+
+  .chips{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:2px 0 4px;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
+  }
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 16px;
+    font-size:0.88rem;
+    font-family:inherit;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .chip[aria-pressed="true"]{
+    background:var(--signal);
+    color:#241a06;
+    border-color:var(--signal);
+    font-weight:700;
+  }
+
+  main{padding:16px 18px 0;}
+
+  .status-line{
+    color:var(--text-dim);
+    font-size:0.85rem;
+    padding:6px 0 14px;
+    min-height:1.2em;
+  }
+
+  ul.news-list{list-style:none;margin:0;padding:0;}
+
+  article.news-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:12px;
+  }
+  article.news-card h2{
+    font-size:1.05rem;
+    margin:0 0 8px;
+    font-weight:700;
+    line-height:1.4;
+  }
+  article.news-card h2 a{
+    color:var(--text);
+    text-decoration:none;
+  }
+  article.news-card h2 a:hover, article.news-card h2 a:focus-visible{
+    color:var(--signal);
+  }
+  article.news-card p.summary{
+    margin:0 0 10px;
+    color:#cfd1db;
+    font-size:0.92rem;
+  }
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:0.78rem;
+    color:var(--text-dim);
+  }
+  .source-tag{
+    color:var(--tuned);
+    font-weight:600;
+  }
+
+  [dir="rtl"] .meta-row{flex-direction:row-reverse;}
+
+  .empty, .error-box{
+    background:var(--surface);
+    border:1px dashed var(--line);
+    border-radius:12px;
+    padding:20px;
+    color:var(--text-dim);
+    font-size:0.9rem;
+    text-align:center;
+  }
+
+  .refresh-row{
+    display:flex;
+    justify-content:flex-end;
+    padding:2px 0 12px;
+  }
+  .icon-btn{
+    background:var(--surface-raised);
+    color:var(--text);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 14px;
+    font-size:0.85rem;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .icon-btn:active{background:var(--line);}
+
+  footer.note{
+    padding:20px 18px 8px;
+    color:var(--text-dim);
+    font-size:0.78rem;
+    border-top:1px solid var(--line);
+    margin-top:20px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  details#aiDetails{
+    margin-top:4px;
+  }
+  summary#aiSummary{
+    cursor:pointer;
+    font-size:0.85rem;
+    color:var(--text-dim);
+    padding:6px 0;
+  }
+  summary#aiSummary:focus-visible{
+    outline:3px solid var(--signal);
+    outline-offset:2px;
+  }
+  .ai-box{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-top:6px;
+  }
+  .ai-box label{
+    display:block;
+    font-size:0.8rem;
+    color:var(--text-dim);
+    margin:10px 0 4px;
+  }
+  .ai-box label:first-of-type{margin-top:0;}
+  .ai-box input[type="password"], .ai-box select{
+    width:100%;
+    padding:9px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface-raised);
+    color:var(--text);
+    font-family:inherit;
+    font-size:0.9rem;
+  }
+  .ai-box .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:0.85rem;
+    color:var(--text);
+    margin:12px 0 0;
+  }
+  .ai-box .checkbox-row input{width:auto;}
+  .ai-box .row{margin-top:12px;}
+  .muted{color:var(--text-dim); font-size:0.82rem; margin:0;}
+
+  .explain-btn{
+    background:transparent;
+    color:var(--tuned);
+    border:1px solid var(--tuned);
+    border-radius:8px;
+    padding:5px 10px;
+    font-size:0.78rem;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .explain-box{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px dashed var(--line);
+    font-size:0.9rem;
+    color:#dfe1ea;
+  }
+</style>
+</head>
+<body>
+
+<header class="app-head">
+  <div class="brand">
+    <span class="brand-dial" aria-hidden="true"></span>
+    <h1 id="app-title">सुनो न्यूज़</h1>
+  </div>
+  <p class="tagline" id="app-tagline">अपनी भाषा में, अपनी पसंद की खबरें — TalkBack से सुनने के लिए बनी</p>
+
+  <fieldset>
+    <legend id="lang-legend">भाषा</legend>
+    <div class="band" role="group" aria-labelledby="lang-legend" id="lang-band"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend id="cat-legend">विषय</legend>
+    <div class="chips" role="group" aria-labelledby="cat-legend" id="cat-chips"></div>
+  </fieldset>
+
+  <details id="aiDetails">
+    <summary id="aiSummary">और विकल्प (AI कुंजी)</summary>
+    <div class="ai-box">
+      <p class="muted" id="aiHelp">यहां OpenRouter या Google Gemini की API key डालें — असली अनुवाद, संक्षेप और "समझाएं" जैसी सुविधाएं इसी से चलेंगी। एक बार डालने के बाद यह इस डिवाइस पर याद रहेगी, बार-बार डालने की ज़रूरत नहीं।</p>
+      <label for="aiKey">API key</label>
+      <input id="aiKey" type="password" autocomplete="off" placeholder="sk-or-... या AIza...">
+      <label for="aiProvider">Provider</label>
+      <select id="aiProvider">
+        <option value="auto">अपने-आप पहचानें (Auto-detect)</option>
+        <option value="openrouter">OpenRouter</option>
+        <option value="gemini">Google Gemini</option>
+      </select>
+      <label class="checkbox-row"><input id="aiRemember" type="checkbox" checked> इस डिवाइस पर याद रखें</label>
+      <div class="row">
+        <button type="button" class="icon-btn" id="aiSave">कुंजी सहेजें</button>
+        <button type="button" class="icon-btn" id="aiClear">कुंजी हटाएं</button>
+      </div>
+      <p class="status-line" id="aiStatus" role="status" aria-live="polite"></p>
+    </div>
+  </details>
+</header>
+
+<main>
+  <div class="refresh-row">
+    <button class="icon-btn" id="refresh-btn" type="button">ताज़ा करें</button>
+  </div>
+  <p class="status-line" id="status-line" role="status" aria-live="polite"></p>
+  <ul class="news-list" id="news-list" aria-label="खबरों की सूची"></ul>
+</main>
+
+<footer class="note" id="footer-note"></footer>
+
+<script>
+(function(){
+
+  // ---------- language + category definitions ----------
+  var LANGS = [
+    { code:"hi", label:"हिंदी", dir:"ltr" },
+    { code:"en", label:"English", dir:"ltr" },
+    { code:"mr", label:"मराठी", dir:"ltr" },
+    { code:"ur", label:"اردو", dir:"rtl" }
+  ];
+
+  // Labels borrowed from the classic Dainik Jagran app's own category names
+  // (टेक ज्ञान, ऑटो, मनोरंजन, जरा हटके) so the structure feels familiar.
+  var CATEGORIES = [
+    { id:"tech",   label_hi:"टेक ज्ञान", label_en:"Tech",          label_mr:"टेक ज्ञान", label_ur:"ٹیک" },
+    { id:"auto",   label_hi:"ऑटो",       label_en:"Auto",          label_mr:"ऑटो",       label_ur:"آٹو" },
+    { id:"movies", label_hi:"मनोरंजन",   label_en:"Movies",        label_mr:"मनोरंजन",   label_ur:"تفریح" },
+    { id:"masala", label_hi:"मसाला",     label_en:"Masala",        label_mr:"मसाला",     label_ur:"مصالحہ" },
+    { id:"hatke",  label_hi:"जरा हटके",  label_en:"Hatke",         label_mr:"हटके",      label_ur:"انوکھا" }
+  ];
+
+  // ---------- feed sources ----------
+  // Reliable public feeds. Swap FEEDS[lang][category] once you have exact
+  // category RSS URLs for your preferred Hindi/Marathi/Urdu outlets.
+  var COMMON_FEEDS = {
+    tech:   "https://feeds.feedburner.com/ndtvnews-tech",
+    auto:   "https://www.indiatoday.in/rss/1206578",
+    movies: "https://www.indiatoday.in/rss/1206514",
+    masala: "https://feeds.feedburner.com/ndtvnews-entertainment",
+    hatke:  "https://www.indiatoday.in/rss/1206600"
+  };
+  var FEEDS = { en: COMMON_FEEDS, hi: COMMON_FEEDS, mr: COMMON_FEEDS, ur: COMMON_FEEDS };
+
+  // ---------- sample fallback content (used if the live feed can't be reached) ----------
+  var SAMPLE = {
+    tech: [
+      { title:"नई स्मार्टफोन तकनीक पर एक नज़र", summary:"बैटरी और कैमरे में सुधार पर केंद्रित एक हालिया रिपोर्ट, जो डिवाइस निर्माताओं की दिशा को दिखाती है।", source:"Sample Feed" },
+      { title:"AI असिस्टेंट्स रोज़मर्रा के ऐप्स में", summary:"कई कंपनियां अपने ऐप्स में बातचीत जैसी सुविधाएं जोड़ रही हैं, जिससे उपयोग आसान हो रहा है।", source:"Sample Feed" }
+    ],
+    auto: [
+      { title:"इलेक्ट्रिक स्कूटर बाज़ार में नई एंट्री", summary:"कम कीमत वाले मॉडल के साथ प्रतिस्पर्धा और तेज़ होने की उम्मीद जताई जा रही है।", source:"Sample Feed" }
+    ],
+    movies: [
+      { title:"आने वाले हफ्तों की बड़ी रिलीज़ें", summary:"बॉक्स ऑफिस पर मुकाबला दिलचस्प होने की संभावना जताई जा रही है।", source:"Sample Feed" }
+    ],
+    masala: [
+      { title:"मनोरंजन जगत की हलचल", summary:"सितारों की गतिविधियों और आगामी प्रोजेक्ट्स को लेकर चर्चा तेज़ है।", source:"Sample Feed" }
+    ],
+    hatke: [
+      { title:"एक अनोखी और दिलचस्प खबर", summary:"रोज़मर्रा से हटकर, कुछ ऐसा जो पढ़ने-सुनने में मज़ेदार लगे।", source:"Sample Feed" }
+    ]
+  };
+
+  var STORAGE_KEY = "suno_news_prefs";
+  var AI_KEY_STORAGE = "suno_news_ai_key";
+  var state = { lang:"hi", cat:"tech" };
+  var ai = { key:"", provider:"auto" };
+
+  // ---------- AI key persistence ----------
+  function loadAiKey(){
+    try{
+      var raw = localStorage.getItem(AI_KEY_STORAGE);
+      if(raw){
+        var p = JSON.parse(raw);
+        ai.key = p.key || "";
+        ai.provider = p.provider || "auto";
+      }
+    }catch(e){}
+  }
+  function saveAiKey(remember){
+    if(remember){
+      try{ localStorage.setItem(AI_KEY_STORAGE, JSON.stringify(ai)); }catch(e){}
+    }
+  }
+  function clearAiKey(){
+    ai.key = ""; ai.provider = "auto";
+    try{ localStorage.removeItem(AI_KEY_STORAGE); }catch(e){}
+  }
+
+  // "जिसकी भी key हो वही चले" — key के आकार से provider पहचानें जब "auto" चुना हो
+  function resolveProvider(){
+    if(ai.provider === "openrouter" || ai.provider === "gemini") return ai.provider;
+    if(/^sk-or-/i.test(ai.key)) return "openrouter";
+    if(/^AIza/.test(ai.key)) return "gemini";
+    return "openrouter"; // sensible default guess
+  }
+
+  function langName(code){
+    return { hi:"Hindi", en:"English", mr:"Marathi", ur:"Urdu" }[code] || "Hindi";
+  }
+
+  function stripJsonFence(text){
+    return text.replace(/```json/gi, "").replace(/```/g, "").trim();
+  }
+
+  // एक ही जगह से AI बुलाना — भीतर से सही provider को भेजता है
+  function callAI(promptText){
+    var provider = resolveProvider();
+    if(provider === "gemini"){
+      var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(ai.key);
+      return fetch(url, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ contents:[{ parts:[{ text: promptText }] }] })
+      }).then(function(res){
+        if(!res.ok) throw new Error("gemini http " + res.status);
+        return res.json();
+      }).then(function(data){
+        var text = data && data.candidates && data.candidates[0] &&
+          data.candidates[0].content && data.candidates[0].content.parts &&
+          data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
+        if(!text) throw new Error("gemini: empty response");
+        return text;
+      });
+    }
+    // default: OpenRouter (OpenAI-style chat completions)
+    return fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + ai.key
+      },
+      body: JSON.stringify({
+        model:"openai/gpt-4o-mini",
+        messages:[{ role:"user", content: promptText }]
+      })
+    }).then(function(res){
+      if(!res.ok) throw new Error("openrouter http " + res.status);
+      return res.json();
+    }).then(function(data){
+      var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      if(!text) throw new Error("openrouter: empty response");
+      return text;
+    });
+  }
+
+  var UI_TEXT = {
+    hi:{ tagline:"अपनी भाषा में, अपनी पसंद की खबरें — TalkBack से सुनने के लिए बनी", langLegend:"भाषा", catLegend:"विषय", refresh:"ताज़ा करें", loading:"खबरें लाई जा रही हैं...", live:"जुड़ी हुई खबरें", sampleNote:"लाइव फीड नहीं मिली — नमूना खबरें दिखाई जा रही हैं।", empty:"इस विषय में अभी कोई खबर नहीं मिली।", footer:"यह ऐप स्क्रीन रीडर (जैसे TalkBack) के साथ इस्तेमाल के लिए बनाई गई है — भाषा अपने आप बोलने के लिए हर खबर पर सही भाषा टैग लगाई गई है।", aiWorking:"AI अनुवाद और संक्षेप तैयार कर रहा है...", aiFailed:"AI से जवाब नहीं मिला — मूल भाषा में खबरें दिखाई जा रही हैं।", explainBtn:"समझाएं", explainLoading:"समझाया जा रहा है...", explainFailed:"अभी समझाया नहीं जा सका, दोबारा कोशिश करें।" },
+    en:{ tagline:"Your language, your topics — built to be read aloud with TalkBack", langLegend:"Language", catLegend:"Category", refresh:"Refresh", loading:"Loading headlines...", live:"Live headlines", sampleNote:"Live feed unavailable — showing sample headlines instead.", empty:"No headlines found for this category right now.", footer:"Built for screen readers like TalkBack — each headline is tagged with its language so pronunciation switches automatically.", aiWorking:"AI is translating and summarizing...", aiFailed:"Could not reach AI — showing original-language headlines.", explainBtn:"Explain", explainLoading:"Explaining...", explainFailed:"Could not explain right now, please try again." },
+    mr:{ tagline:"तुमच्या भाषेत, तुमच्या आवडीच्या बातम्या — TalkBack साठी तयार", langLegend:"भाषा", catLegend:"विषय", refresh:"रिफ्रेश करा", loading:"बातम्या आणल्या जात आहेत...", live:"थेट बातम्या", sampleNote:"थेट फीड मिळाली नाही — नमुना बातम्या दाखवल्या जात आहेत.", empty:"या विषयात सध्या बातमी नाही.", footer:"ही ॲप TalkBack सारख्या स्क्रीन रीडरसाठी बनवली आहे — प्रत्येक बातमीला योग्य भाषा टॅग दिली आहे.", aiWorking:"AI भाषांतर आणि सारांश तयार करत आहे...", aiFailed:"AI कडून उत्तर मिळाले नाही — मूळ भाषेत बातम्या दाखवत आहोत.", explainBtn:"समजावून सांगा", explainLoading:"समजावले जात आहे...", explainFailed:"सध्या समजावता आले नाही, पुन्हा प्रयत्न करा." },
+    ur:{ tagline:"اپنی زبان میں، اپنی پسند کی خبریں — TalkBack کے لیے بنائی گئی", langLegend:"زبان", catLegend:"موضوع", refresh:"تازہ کریں", loading:"خبریں لائی جا رہی ہیں...", live:"براہ راست خبریں", sampleNote:"براہ راست فیڈ نہیں ملی — نمونہ خبریں دکھائی جا رہی ہیں۔", empty:"اس موضوع میں فی الحال کوئی خبر نہیں ملی۔", footer:"یہ ایپ TalkBack جیسے اسکرین ریڈر کے لیے بنائی گئی ہے — ہر خبر پر درست زبان کا ٹیگ لگایا گیا ہے۔", aiWorking:"AI ترجمہ اور خلاصہ تیار کر رہا ہے...", aiFailed:"AI سے جواب نہیں ملا — اصل زبان میں خبریں دکھائی جا رہی ہیں۔", explainBtn:"سمجھائیں", explainLoading:"سمجھایا جا رہا ہے...", explainFailed:"ابھی سمجھایا نہیں جا سکا، دوبارہ کوشش کریں۔" }
+  };
+
+  function catLabel(cat, lang){
+    return cat["label_"+lang] || cat.label_en;
+  }
+
+  // ---------- persistence (plain localStorage — this runs as a real installed app,
+  // not inside the Claude artifact sandbox, so window.storage is not used here) ----------
+  function loadPrefs(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var p = JSON.parse(raw);
+        if(p.lang) state.lang = p.lang;
+        if(p.cat) state.cat = p.cat;
+      }
+    }catch(e){ /* no saved prefs yet, or storage unavailable */ }
+  }
+  function savePrefs(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  // ---------- rendering controls ----------
+  var langBand = document.getElementById("lang-band");
+  var catChips = document.getElementById("cat-chips");
+  var statusLine = document.getElementById("status-line");
+  var newsList = document.getElementById("news-list");
+  var refreshBtn = document.getElementById("refresh-btn");
+  var footerNote = document.getElementById("footer-note");
+  var appTagline = document.getElementById("app-tagline");
+  var langLegend = document.getElementById("lang-legend");
+  var catLegend = document.getElementById("cat-legend");
+  var aiKeyInput = document.getElementById("aiKey");
+  var aiProviderSelect = document.getElementById("aiProvider");
+  var aiRememberCheck = document.getElementById("aiRemember");
+  var aiSaveBtn = document.getElementById("aiSave");
+  var aiClearBtn = document.getElementById("aiClear");
+  var aiStatus = document.getElementById("aiStatus");
+
+  function refreshAiStatus(){
+    if(ai.key){
+      aiStatus.textContent = "AI सुविधाएं चालू हैं (" + resolveProvider() + ") — अनुवाद, संक्षेप और \"समझाएं\" काम करेंगे।";
+    } else {
+      aiStatus.textContent = "अभी कोई key नहीं है — खबरें बिना अनुवाद/संक्षेप के मूल भाषा में दिखेंगी।";
+    }
+  }
+
+  aiSaveBtn.addEventListener("click", function(){
+    ai.key = aiKeyInput.value.trim();
+    ai.provider = aiProviderSelect.value;
+    saveAiKey(aiRememberCheck.checked);
+    refreshAiStatus();
+    loadNews();
+  });
+  aiClearBtn.addEventListener("click", function(){
+    clearAiKey();
+    aiKeyInput.value = "";
+    aiProviderSelect.value = "auto";
+    refreshAiStatus();
+  });
+
+  function renderLangBand(){
+    langBand.innerHTML = "";
+    LANGS.forEach(function(l){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = l.label;
+      btn.setAttribute("aria-pressed", String(l.code === state.lang));
+      btn.lang = l.code;
+      btn.addEventListener("click", function(){
+        state.lang = l.code;
+        savePrefs();
+        applyLanguageChrome();
+        renderLangBand();
+        renderCatChips();
+        loadNews();
+      });
+      langBand.appendChild(btn);
+    });
+  }
+
+  function renderCatChips(){
+    catChips.innerHTML = "";
+    CATEGORIES.forEach(function(c){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip";
+      btn.textContent = catLabel(c, state.lang);
+      btn.setAttribute("aria-pressed", String(c.id === state.cat));
+      btn.addEventListener("click", function(){
+        state.cat = c.id;
+        savePrefs();
+        renderCatChips();
+        loadNews();
+      });
+      catChips.appendChild(btn);
+    });
+  }
+
+  function applyLanguageChrome(){
+    var t = UI_TEXT[state.lang];
+    var dirInfo = LANGS.filter(function(l){return l.code===state.lang;})[0];
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = dirInfo.dir;
+    appTagline.textContent = t.tagline;
+    langLegend.textContent = t.langLegend;
+    catLegend.textContent = t.catLegend;
+    refreshBtn.textContent = t.refresh;
+    footerNote.textContent = t.footer;
+  }
+
+  function renderNews(items){
+    newsList.innerHTML = "";
+    var t = UI_TEXT[state.lang];
+    var dirInfo = LANGS.filter(function(l){return l.code===state.lang;})[0];
+
+    if(!items || items.length === 0){
+      var li = document.createElement("li");
+      var box = document.createElement("div");
+      box.className = "empty";
+      box.textContent = t.empty;
+      li.appendChild(box);
+      newsList.appendChild(li);
+      return;
+    }
+
+    items.forEach(function(item){
+      var li = document.createElement("li");
+      var art = document.createElement("article");
+      art.className = "news-card";
+      art.lang = state.lang;
+      art.dir = dirInfo.dir;
+
+      var h2 = document.createElement("h2");
+      if(item.link){
+        var a = document.createElement("a");
+        a.href = item.link;
+        a.textContent = item.title;
+        h2.appendChild(a);
+      } else {
+        h2.textContent = item.title;
+      }
+      art.appendChild(h2);
+
+      if(item.summary){
+        var p = document.createElement("p");
+        p.className = "summary";
+        p.textContent = item.summary;
+        art.appendChild(p);
+      }
+
+      var meta = document.createElement("div");
+      meta.className = "meta-row";
+      var src = document.createElement("span");
+      src.className = "source-tag";
+      src.textContent = item.source || "";
+      meta.appendChild(src);
+
+      if(ai.key){
+        var explainBtn = document.createElement("button");
+        explainBtn.type = "button";
+        explainBtn.className = "explain-btn";
+        explainBtn.textContent = t.explainBtn;
+        meta.appendChild(explainBtn);
+
+        var explainBox = document.createElement("div");
+        explainBox.className = "explain-box";
+        explainBox.style.display = "none";
+        explainBox.setAttribute("role", "status");
+
+        explainBtn.addEventListener("click", function(){
+          explainBox.style.display = "block";
+          explainArticle(item, state.lang, explainBox);
+        });
+        art.appendChild(meta);
+        art.appendChild(explainBox);
+      } else {
+        art.appendChild(meta);
+      }
+
+      li.appendChild(art);
+      newsList.appendChild(li);
+    });
+  }
+
+  function stripHtml(str){
+    if(!str) return "";
+    var tmp = document.createElement("div");
+    tmp.innerHTML = str;
+    return (tmp.textContent || tmp.innerText || "").trim();
+  }
+
+  function loadNews(){
+    var t = UI_TEXT[state.lang];
+    statusLine.textContent = t.loading;
+    newsList.innerHTML = "";
+
+    var feedUrl = (FEEDS[state.lang] || FEEDS.en)[state.cat];
+    if(!feedUrl){
+      renderNews(SAMPLE[state.cat]);
+      statusLine.textContent = t.sampleNote;
+      return;
+    }
+
+    var proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(feedUrl);
+
+    fetch(proxyUrl)
+      .then(function(res){
+        if(!res.ok) throw new Error("network");
+        return res.json();
+      })
+      .then(function(data){
+        if(!data || data.status !== "ok" || !data.items || data.items.length === 0){
+          throw new Error("empty");
+        }
+        var items = data.items.slice(0, 10).map(function(it){
+          return {
+            title: stripHtml(it.title),
+            summary: stripHtml(it.description).slice(0, 220),
+            link: it.link,
+            source: (data.feed && data.feed.title) || ""
+          };
+        });
+
+        if(!ai.key){
+          renderNews(items);
+          statusLine.textContent = t.live;
+          return;
+        }
+
+        statusLine.textContent = t.aiWorking;
+        translateAndSummarize(items, state.lang)
+          .then(function(processed){
+            renderNews(processed);
+            statusLine.textContent = t.live;
+          })
+          .catch(function(){
+            // AI न चले तो भी मूल खबरें दिखती रहें, ऐप कभी अटके नहीं
+            renderNews(items);
+            statusLine.textContent = t.aiFailed;
+          });
+      })
+      .catch(function(){
+        renderNews(SAMPLE[state.cat]);
+        statusLine.textContent = t.sampleNote;
+      });
+  }
+
+  // हर खबर को चुनी हुई भाषा में असली अनुवाद + सुनने-लायक छोटा सारांश देता है
+  function translateAndSummarize(items, lang){
+    var lname = langName(lang);
+    var input = items.map(function(it, i){ return { i:i, title:it.title, summary:it.summary }; });
+    var prompt =
+      "You are helping a news-reading app. Translate each item's title and summary into " + lname +
+      " (natural, simple, spoken-friendly language), and also produce a short spoken-style summary " +
+      "of at most 2 short sentences per item. Keep names, numbers, and facts accurate — do not invent details. " +
+      "Respond with ONLY a JSON array, no extra text, no markdown fences, in this exact shape: " +
+      '[{"i":0,"title":"...","summary":"..."}, ...]. Input items:\n' +
+      JSON.stringify(input);
+
+    return callAI(prompt).then(function(raw){
+      var parsed = JSON.parse(stripJsonFence(raw));
+      var byIndex = {};
+      parsed.forEach(function(p){ byIndex[p.i] = p; });
+      return items.map(function(it, i){
+        var p = byIndex[i];
+        return {
+          title: (p && p.title) ? p.title : it.title,
+          summary: (p && p.summary) ? p.summary : it.summary,
+          link: it.link,
+          source: it.source
+        };
+      });
+    });
+  }
+
+  // किसी एक खबर को सरल भाषा में "समझाएं" — बटन दबाने पर बुलाया जाता है
+  function explainArticle(item, lang, targetEl){
+    var lname = langName(lang);
+    targetEl.textContent = UI_TEXT[lang].explainLoading;
+    var prompt =
+      "Explain this news headline and summary in simple, spoken-friendly " + lname +
+      " language, in about 3-4 short sentences, for someone listening via a screen reader. " +
+      "Only use the facts given, do not invent anything. Respond with plain text only, no markdown.\n" +
+      "Title: " + item.title + "\nSummary: " + item.summary;
+
+    callAI(prompt).then(function(text){
+      targetEl.textContent = text.trim();
+      targetEl.setAttribute("tabindex", "-1");
+      targetEl.focus();
+    }).catch(function(){
+      targetEl.textContent = UI_TEXT[lang].explainFailed;
+    });
+  }
+
+  refreshBtn.addEventListener("click", loadNews);
+
+  // ---------- init ----------
+  loadPrefs();
+  loadAiKey();
+  aiKeyInput.value = ai.key;
+  aiProviderSelect.value = ai.provider || "auto";
+  refreshAiStatus();
+  applyLanguageChrome();
+  renderLangBand();
+  renderCatChips();
+  loadNews();
+
+})();
+</script>
+</body>
+</html>
