@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.SunoNews" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.SunoNews" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:statusBarColor">#14151A</item>
         <item name="android:windowBackground">#14151A</item>
     </style>
